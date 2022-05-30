@@ -1,0 +1,10 @@
+image: ghcr.io/capuanob/cimg-fuzz:latest
+project: cimg
+target: cimg-fuzz
+tests:
+  - file://fuzz/corpus
+
+cmds:
+  - cmd: /fuzz-cimg -close_fd_mask=2
+    libfuzzer: true
+    max_length: 300000
