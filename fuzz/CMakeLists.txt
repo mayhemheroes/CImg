@@ -39,7 +39,7 @@
 #  knowledge of the CeCILL license and that you accept its terms.
 #
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.16)
 PROJECT(Fuzz-CIMG)
 
 # Prevent compilation in-source
