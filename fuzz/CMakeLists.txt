@@ -295,7 +295,7 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CIMG_CFLAGS}")
 
 
-add_executable(fuzz-cimg fuzz.cpp)
+add_executable(fuzz-cimg fuzz_image_transformations.cpp)
 
 # Add libfuzzer to linker flags
 target_compile_options(fuzz-cimg PUBLIC -fsanitize=fuzzer)

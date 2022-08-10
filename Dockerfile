@@ -3,13 +3,10 @@ FROM --platform=linux/amd64 ubuntu:20.04 as builder
 
 ## Install build dependencies.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y git cmake clang ffmpeg fftw3 graphicsmagick imagemagick libcurlpp-dev curl \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y cmake clang ffmpeg fftw3 graphicsmagick imagemagick libcurlpp-dev curl \
     libjpeg-dev libpng-dev libtiff-dev libopencv-dev libx11-dev libxext-dev libxxf86vm-dev libxrandr-dev
 
-## Add source code to the build stage. ADD prevents git clone being cached when it shouldn't
-WORKDIR /
-ADD https://api.github.com/repos/capuanob/CImg/git/refs/heads/mayhem version.json
-RUN git clone -b mayhem https://github.com/capuanob/CImg.git
+ADD . /CImg
 WORKDIR /CImg/fuzz
 
 ## Build
@@ -18,15 +15,8 @@ WORKDIR build
 RUN cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 RUN make -j$(nproc)
 
-## Prepare all library dependencies for copy
-WORKDIR /
-RUN mkdir /deps
-RUN cp `ldd /CImg/fuzz/fuzz-cimg | grep so | sed -e '/^[^\t]/ d' | sed -e 's/\t//' | sed -e 's/.*=..//' | sed -e 's/ (0.*)//' | sort | uniq` /deps 2>/dev/null || :
-
 ## Package Stage
-
 FROM --platform=linux/amd64 ubuntu:20.04
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y libtiff5 libjpeg-turbo8 zlib1g libpng16-16 libopenexr24 libilmbase24 libxext6 libxrandr2 libx11-6 libgcc-s1 libwebp6 libzstd1 liblzma5 libjbig0 libxrender1 libxcb1 libxau6 libxdmcp6 libbsd0
 COPY --from=builder /CImg/fuzz/fuzz-cimg /fuzz-cimg
-COPY --from=builder /deps /usr/lib
-
-CMD /fuzz-cimg -close_fd_mask=2
